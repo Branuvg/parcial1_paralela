@@ -148,7 +148,8 @@ péguenla aquí abajo junto con la gráfica y el screenshot de consola.
 ### 6.1 Ernesto Ascencio (23009)
 
 - **Máquina:** 15 núcleos · macOS · GCC 16 · Riemann n=10⁹, histograma N=5·10⁷
-- **Datos:** [`resultados_Ernesto.md`](docs/img/Ernesto_metricas.png)
+
+![Consola Ernesto](docs/img/Ernesto_consola.png)
 
 ![métricas Ernesto](docs/img/Ernesto_metricas.png)
 
