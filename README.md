@@ -148,9 +148,9 @@ péguenla aquí abajo junto con la gráfica y el screenshot de consola.
 ### 6.1 Ernesto Ascencio (23009)
 
 - **Máquina:** 15 núcleos · macOS · GCC 16 · Riemann n=10⁹, histograma N=5·10⁷
-- **Datos:** [`resultados_Ernesto.md`](resultados_Ernesto.md) · **consola:** `docs/img/ernesto.png`
+- **Datos:** [`resultados_Ernesto.md`](docs/img/Ernesto_metricas.png)
 
-![métricas Ernesto](img/Ernesto_metricas.png)
+![métricas Ernesto](docs/img/Ernesto_metricas.png)
 
 Corrida representativa (mediana de 3): Riemann llega a **9.3× con 15 hilos** (≈95 % de
 eficiencia hasta 4), histograma a **~11×**. El histograma (≈0.28 s) tiene ±5 % de ruido por
