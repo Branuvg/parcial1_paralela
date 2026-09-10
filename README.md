@@ -173,7 +173,7 @@ histograma (~0.2 s, corto) escala bien hasta 2 hilos pero cae antes que Riemann 
 38 % en 16): es la fase *memory-bound* (min/max y clasificación) saturando el ancho de banda
 de memoria más rápido al ser una corrida tan breve.
 
-### 6.3 Ana Laura (231645)
+### 6.3 Ana Laura (221645)
 
 - **Máquina:** Intel Core i9-14900K · 32 CPUs visibles en WSL2 Ubuntu · GCC 15.2.0
 - **Datos:** [`resultados_Ana.md`](docs/resultados_Ana.md) y [`resultados_Ana.csv`](docs/resultados_Ana.csv)
@@ -181,6 +181,10 @@ de memoria más rápido al ser una corrida tan breve.
 
 La verificación del histograma paralelo terminó correctamente (`OK`). La gráfica no se generó porque la instalación de Ubuntu no tiene `matplotlib`.
 
+![Consola Ana](docs/img/Ana_consola.png)
+
+![métricas Ana](docs/img/Ana_metricas.png)
+Ambos algoritmos escalan casi linealmente hasta 8 hilos, alcanzando un speedup de 7.36× en Riemann y 7.59× en el histograma. A partir de 16 hilos la eficiencia disminuye considerablemente debido a la sobrecarga de paralelización y la saturación de recursos; aun así, el histograma alcanzó un speedup máximo de 11.72× y Riemann de 8.25× con 32 hilos.
 ---
 
 ## 7. Análisis: ¿por qué mejoraron los algoritmos secuenciales?
