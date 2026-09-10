@@ -1,4 +1,4 @@
-# Informe — Paralelización con OpenMP
+# Informe - Paralelización con OpenMP
 
 **Consultoría THE BIG THREE**
 Gabriel Bran (23590) · Ana Laura (231645) · Ernesto Ascencio (23009)
@@ -49,12 +49,12 @@ variable compartida → se pierden sumas.
 - Descartado `atomic` sobre el `+=`: una operación atómica por iteración (10⁹ veces)
   serializa el bucle y elimina el speedup.
 
-### 3.2 `histograma[idx]++` — la race principal del histograma
+### 3.2 `histograma[idx]++` - la race principal del histograma
 
 Es un *read-modify-write* sobre memoria compartida. Dos hilos en la misma cubeta a la vez
 pierden incrementos (sin protección, `Σ cubetas < N`; se verifica en cada corrida).
 
-- **Solución — privatización manual:** cada hilo declara `long long local[100]` **dentro** de
+- **Solución - privatización manual:** cada hilo declara `long long local[100]` **dentro** de
   la región `parallel`, es decir en *su* pila, lejos de la de los demás. Cuenta ahí sin
   ningún candado. Al terminar su parte del bucle, bajo `critical`, suma sus 100 valores al
   histograma global.
@@ -70,7 +70,7 @@ pierden incrementos (sin protección, `Σ cubetas < N`; se verifica en cada corr
 
 ### 3.3 `min` / `max` compartidos (histograma)
 
-`if (a[i] < min) min = a[i];` — lectura y escritura de `min`/`max` por todos los hilos.
+`if (a[i] < min) min = a[i];` - lectura y escritura de `min`/`max` por todos los hilos.
 
 - **Solución:** `reduction(min:mn)` / `reduction(max:mx)`. Parciales privados
   (inicializados por OpenMP a `+INF` / `−INF`) combinados al final.
@@ -142,7 +142,7 @@ Cada integrante corre `make run NOMBRE=<su nombre>` en su máquina. Eso genera s
 (`docs/resultados_<nombre>.md`) y su gráfica (`docs/img/<nombre>_metricas.png`); además adjunta
 el screenshot/video de la ejecución en consola.
 
-La tabla de cada quien vive en `docs/resultados_<nombre>.md` (generada por `benchmark.py`) —
+La tabla de cada quien vive en `docs/resultados_<nombre>.md` (generada por `benchmark.py`) -
 péguenla aquí abajo junto con la gráfica y el screenshot de consola.
 
 ### 6.1 Ernesto Ascencio (23009)
@@ -159,10 +159,19 @@ ser corto; Riemann (≈3.7 s) es la señal limpia.
 
 ### 6.2 Gabriel Bran (23590)
 
-- **Máquina:** _(CPU, núcleos, SO, compilador)_ — pendiente de correr
-- **Datos:** `resultados_Gabriel.md` · **gráfica:** `img/Gabriel_metricas.png` · **consola:** `img/gabriel.png`
+- **Máquina:** 16 núcleos (Intel Core Ultra 9 386H) · Windows 11 · Riemann n=10⁹, histograma N=5·10⁷
 
-_(pegar aquí la tabla de `resultados_Gabriel.md` y `![métricas](img/Gabriel_metricas.png)`)_
+![Consola Gabriel](docs/img/Gabriel_consola.png)
+
+![métricas Gabriel](docs/img/Gabriel_metricas.png)
+
+
+Riemann escala casi linealmente hasta 8 hilos (llega incluso a >100 % de eficiencia,
+producto del ruido normal de medición a esa escala de tiempo) y cae a 97 % de eficiencia en
+16 - la fracción serial y el paso de P-cores a E-cores del Ultra 9 386H empiezan a pesar. El
+histograma (~0.2 s, corto) escala bien hasta 2 hilos pero cae antes que Riemann (58 % en 8,
+38 % en 16): es la fase *memory-bound* (min/max y clasificación) saturando el ancho de banda
+de memoria más rápido al ser una corrida tan breve.
 
 ### 6.3 Ana Laura (231645)
 
@@ -195,9 +204,9 @@ La verificación del histograma paralelo terminó correctamente (`OK`). La gráf
   3. En la máquina de prueba los "15 núcleos" incluyen núcleos de eficiencia (E-cores), más
      lentos que los P-cores; los últimos hilos aportan menos.
 
-**Conclusión.** Las decisiones —`parallel for` con descomposición de datos, `reduction` en
+**Conclusión.** Las decisiones -`parallel for` con descomposición de datos, `reduction` en
 vez de `atomic`, privatización manual del histograma en vez de `atomic`/`critical` por
-iteración, `rand_r` en vez de `rand`, y `schedule(static)` por carga homogénea— convirtieron
+iteración, `rand_r` en vez de `rand`, y `schedule(static)` por carga homogénea- convirtieron
 dos programas estrictamente seriales en programas con speedup ≈4× a 4 hilos (eficiencia
 ≈100 %) y ≈10× al máximo de hilos, con el techo esperado impuesto por Amdahl, el ancho de
 banda de memoria y los E-cores.
