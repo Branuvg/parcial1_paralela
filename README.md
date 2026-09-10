@@ -166,10 +166,11 @@ _(pegar aquí la tabla de `resultados_Gabriel.md` y `![métricas](img/Gabriel_me
 
 ### 6.3 Ana Laura (231645)
 
-- **Máquina:** _(CPU, núcleos, SO, compilador)_ — pendiente de correr
-- **Datos:** `resultados_Ana.md` · **gráfica:** `img/Ana_metricas.png` · **consola:** `img/ana.png`
+- **Máquina:** Intel Core i9-14900K · 32 CPUs visibles en WSL2 Ubuntu · GCC 15.2.0
+- **Datos:** [`resultados_Ana.md`](docs/resultados_Ana.md) y [`resultados_Ana.csv`](docs/resultados_Ana.csv)
+- **Ejecución:** `python3 benchmark.py Ana` en Ubuntu/WSL2; mediana de 3 corridas.
 
-_(pegar aquí la tabla de `resultados_Ana.md` y `![métricas](img/Ana_metricas.png)`)_
+La verificación del histograma paralelo terminó correctamente (`OK`). La gráfica no se generó porque la instalación de Ubuntu no tiene `matplotlib`.
 
 ---
 
