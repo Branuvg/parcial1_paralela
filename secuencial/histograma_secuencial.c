@@ -1,67 +1,78 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define NUM_CUBETAS 100
+#define SEED_DATASET 42u
 
-// Genera un arreglo de N temperaturas aleatorias entre minTemp y maxTemp
-float* generarMediciones(long long N, float minTemp, float maxTemp) {
-    float *arreglo = malloc(N * sizeof(float));
-    if (arreglo == NULL) {
-        return NULL;
-    }
-    for (long long i = 0; i < N; i++) {
-        arreglo[i] = minTemp + ((float)rand() / RAND_MAX) * (maxTemp - minTemp);
-    }
-    return arreglo;
+/* Llena `a` con N temperaturas pseudoaleatorias en [lo, hi]. */
+static void generar(float *a, long long N, float lo, float hi) {
+    unsigned int seed = SEED_DATASET;
+    for (long long i = 0; i < N; i++)
+        a[i] = lo + ((float)rand_r(&seed) / RAND_MAX) * (hi - lo);
 }
 
-// Recorre el arreglo para encontrar min y max reales dentro de los datos
-void encontrarMinMax(float *arreglo, long long N, float *min, float *max) {
-    *min = arreglo[0];
-    *max = arreglo[0];
+static void encontrarMinMax(const float *a, long long N, float *min, float *max) {
+    float mn = a[0], mx = a[0];
     for (long long i = 1; i < N; i++) {
-        if (arreglo[i] < *min) *min = arreglo[i];
-        if (arreglo[i] > *max) *max = arreglo[i];
+        if (a[i] < mn) mn = a[i];
+        if (a[i] > mx) mx = a[i];
     }
+    *min = mn; *max = mx;
 }
 
-// Clasifica el arreglo en NUM_CUBETAS cubetas
-void clasificarEnCubetas(float *arreglo, long long N, int histograma[NUM_CUBETAS],
-                          float min, float max) {
-    float anchoRango = (max - min) / NUM_CUBETAS;
-
+static void clasificarEnCubetas(const float *a, long long N, long long *histograma,
+                                float min, float max) {
+    float ancho = (max - min) / NUM_CUBETAS;
     for (long long i = 0; i < N; i++) {
-        int indice = (int)((arreglo[i] - min) / anchoRango);
-        if (indice >= NUM_CUBETAS) indice = NUM_CUBETAS - 1;
-        if (indice < 0) indice = 0;
-        histograma[indice]++;
+        int idx = (int)((a[i] - min) / ancho);
+        if (idx >= NUM_CUBETAS) idx = NUM_CUBETAS - 1;
+        if (idx < 0) idx = 0;
+        histograma[idx]++;
     }
 }
 
-void imprimirHistograma(int histograma[NUM_CUBETAS], float min, float anchoRango) {
-    printf("\nHistograma (100 cubetas):\n");
-    for (int j = 0; j < NUM_CUBETAS; j++) {
-        float lo = min + j * anchoRango;
-        float hi = min + (j + 1) * anchoRango;
-        printf("Cubeta %3d [%8.2f, %8.2f): %d\n", j, lo, hi, histograma[j]);
+int main(int argc, char **argv) {
+    long long N = 50000000L;
+    int printHist = 0;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--print-histograma") == 0) printHist = 1;
+        else N = atoll(argv[i]);
     }
-}
+    if (N < 1) { fprintf(stderr, "N debe ser >= 1\n"); return 1; }
 
-int main(void) {
-    srand((unsigned int)time(NULL));
+    float *a = malloc(N * sizeof(float));
+    if (a == NULL) { fprintf(stderr, "sin memoria\n"); return 1; }
 
-    long long N = 10000000;   // cantidad de mediciones a simular
-    float *arreglo = generarMediciones(N, -30.0f, 50.0f); // temperaturas entre -30 y 50
+    generar(a, N, -30.0f, 50.0f);
 
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+
+    generar(a, N, -30.0f, 50.0f);
     float min, max;
-    encontrarMinMax(arreglo, N, &min, &max);
+    encontrarMinMax(a, N, &min, &max);
+    long long histograma[NUM_CUBETAS] = {0};
+    clasificarEnCubetas(a, N, histograma, min, max);
 
-    int histograma[NUM_CUBETAS] = {0};
-    clasificarEnCubetas(arreglo, N, histograma, min, max);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    double tiempo = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
 
-    imprimirHistograma(histograma, min, (max - min) / NUM_CUBETAS);
+    printf("=== Histograma de temperaturas (SECUENCIAL) ===\n");
+    printf("Mediciones (N):   %lld\n", N);
+    printf("Cubetas:          %d\n", NUM_CUBETAS);
+    printf("Rango [min, max]: [%.4f, %.4f]\n", min, max);
+    printf("Tiempo (s):       %.6f\n", tiempo);
 
-    free(arreglo);
+    if (printHist) {
+        float ancho = (max - min) / NUM_CUBETAS;
+        printf("\nHistograma (%d cubetas):\n", NUM_CUBETAS);
+        for (int j = 0; j < NUM_CUBETAS; j++)
+            printf("Cubeta %3d [%8.2f, %8.2f): %lld\n",
+                   j, min + j * ancho, min + (j + 1) * ancho, histograma[j]);
+    }
+
+    free(a);
     return 0;
 }
