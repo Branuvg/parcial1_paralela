@@ -67,3 +67,11 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# binarios compilados de este repo (extension-less)
+bin/
+secuencial/riemann_secuencial
+secuencial/histograma_secuencial
+paralelo/riemann_paralelo
+paralelo/histograma_paralelo
+Makefile.mio
